@@ -1,5 +1,6 @@
 pipeline {
     agent any
+
     tools {
         maven 'Maven'
     }
@@ -10,12 +11,7 @@ pipeline {
     }
 
     stages {
-        stage('Check Docker') {
-            steps {
-                bat 'docker --version'
-            }
-        }
-        stage("Repo Clone") {
+        stage('Clone Code') {
             steps {
                 git branch: 'main',
                     credentialsId: 'github-creds',
@@ -23,26 +19,38 @@ pipeline {
             }
         }
 
-        stage('Check Java') {
+        stage('Build JAR') {
             steps {
-                bat 'echo JAVA_HOME=%JAVA_HOME%'    
-                bat 'java -version'
+                bat 'mvn clean package'
             }
         }
 
-        stage("Build") {
+        stage('Build Docker Image') {
             steps {
-                bat "mvn clean package"
+                bat 'docker build -t hello-java-app .'
+            }
+        }
+
+        stage('Stop Old Container') {
+            steps {
+                bat 'docker stop my-java-app || exit 0'
+                bat 'docker rm my-java-app || exit 0'
+            }
+        }
+
+        stage('Run Container') {
+            steps {
+                bat 'docker run -d --name my-java-app -p 8080:8080 hello-java-app'
             }
         }
     }
 
     post {
         success {
-            echo "Build Successful ✅"
+            echo 'App Deployed via Docker 🚀'
         }
         failure {
-            echo "Build Failed ❌"
+            echo 'Pipeline Failed ❌'
         }
     }
 }
