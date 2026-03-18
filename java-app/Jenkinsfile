@@ -10,6 +10,11 @@ pipeline {
     }
 
     stages {
+        stage('Check Docker') {
+            steps {
+                bat 'docker --version'
+            }
+        }
         stage("Repo Clone") {
             steps {
                 git branch: 'main',
