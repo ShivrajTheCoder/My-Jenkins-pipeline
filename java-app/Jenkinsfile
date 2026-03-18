@@ -1,35 +1,40 @@
-pipeline{
+pipeline {
     agent any
 
-    environment{
+    environment {
         JAVA_HOME = "C:\\Program Files\\Java\\jdk-17"
         PATH = "${env.JAVA_HOME}\\bin;${env.PATH}"
     }
 
-    stages{
-        stage("Repo Clone"){
-            steps{
-                git branch:'main',
-                credentialsId: 'github-creds',
-                url: 'https://github.com/ShivrajTheCoder/HelloJavaApi.git'
+    stages {
+        stage("Repo Clone") {
+            steps {
+                git branch: 'main',
+                    credentialsId: 'github-creds',
+                    url: 'https://github.com/ShivrajTheCoder/HelloJavaApi.git'
             }
         }
-        stage('Check Java'){
-            steps{
+
+        stage('Check Java') {
+            steps {
                 bat 'echo JAVA_HOME=%JAVA_HOME%'    
                 bat 'java -version'
             }
         }
-        stage("Build"){
-                bat "mvn clean package"    
+
+        stage("Build") {
+            steps {
+                bat "mvn clean package"
+            }
         }
-        post{
-            success{
-                echo "Build Successfull"
-            }
-            failure{
-                echo "Build Failed"
-            }
+    }
+
+    post {
+        success {
+            echo "Build Successful ✅"
+        }
+        failure {
+            echo "Build Failed ❌"
         }
     }
 }
